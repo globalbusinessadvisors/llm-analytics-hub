@@ -1,0 +1,40 @@
+[package]
+name = "llm-analytics-hub"
+version = "0.1.0"
+edition = "2021"
+authors = ["LLM Analytics Team"]
+description = "Centralized analytics hub for LLM ecosystem monitoring"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["serde", "v4"] }
+thiserror = "1.0"
+async-trait = "0.1"
+
+# Optional dependencies for specific features
+tokio = { version = "1.0", features = ["full"], optional = true }
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres"], optional = true }
+influxdb = { version = "0.7", optional = true }
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["full"] }
+
+[features]
+default = ["async"]
+async = ["tokio"]
+postgres = ["sqlx"]
+timeseries = ["influxdb"]
+
+[[example]]
+name = "event_examples"
+path = "src/examples/event_examples.rs"
+
+[[example]]
+name = "metrics_examples"
+path = "src/examples/metrics_examples.rs"
+
+[lib]
+name = "llm_analytics_hub"
+path = "src/lib.rs"
