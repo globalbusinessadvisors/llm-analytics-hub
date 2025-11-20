@@ -591,16 +591,20 @@ llm-analytics-hub/
 │   │   ├── timeseries.rs         # Time-series models
 │   │   ├── correlation.rs        # Correlation schemas
 │   │   └── api.rs                # API response models
+│   ├── database/                 # **NEW** Database layer
+│   │   ├── mod.rs                # Database client with pooling (580 lines)
+│   │   ├── schema.rs             # TimescaleDB schema definitions
+│   │   └── queries.rs            # Optimized query functions
 │   ├── pipeline/                 # Event processing pipeline
-│   │   ├── ingestion.rs          # Kafka ingestion
+│   │   ├── ingestion.rs          # **ENHANCED** Kafka ingestion (380 lines)
 │   │   ├── processing.rs         # Event processing
 │   │   ├── storage.rs            # TimescaleDB storage
 │   │   ├── cache.rs              # Redis caching
 │   │   └── stream.rs             # Real-time streaming
 │   ├── analytics/                # Analytics engine
-│   │   ├── aggregation.rs        # Multi-window aggregation
-│   │   ├── correlation.rs        # Event correlation
-│   │   ├── anomaly.rs            # Anomaly detection
+│   │   ├── aggregation_engine.rs # **NEW** Multi-window aggregation (380 lines)
+│   │   ├── correlation_engine.rs # **NEW** 8-type correlation (420 lines)
+│   │   ├── anomaly.rs            # Anomaly detection (269 lines)
 │   │   └── prediction.rs         # Time-series forecasting
 │   ├── resilience/               # Resilience patterns
 │   │   ├── circuit_breaker.rs    # Circuit breaker
@@ -814,12 +818,20 @@ For questions, issues, or feature requests:
 **Last Updated**: 2025-01-20
 
 ### Implementation Metrics
-- **Total Code**: 27,800+ lines across 111+ files
+- **Total Code**: 30,100+ lines across 118+ files
+- **Rust Core**: 2,330+ lines of production analytics code
 - **Test Coverage**: 90%+ (116+ tests)
 - **Documentation**: 10,683+ lines across 20+ documents
 - **Microservices**: 7 (5 Rust + 1 TypeScript API + 1 Frontend)
 - **Kubernetes Manifests**: 20+ production-ready files
 - **CI/CD Stages**: 11 automated pipeline stages
+
+### Rust Implementation Details
+- **Database Layer**: 880 lines (connection pooling, TimescaleDB integration)
+- **Event Ingestion**: 380 lines (Kafka consumer, batch processing, DLQ)
+- **Anomaly Detection**: 269 lines (Z-score, baselines, severity classification)
+- **Correlation Engine**: 420 lines (8 correlation types, cross-module analysis)
+- **Aggregation Engine**: 380 lines (multi-window, percentile calculations)
 
 ### Commercial Viability
 - ✅ Enterprise-grade code quality

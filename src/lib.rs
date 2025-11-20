@@ -57,11 +57,17 @@ pub mod models {
     pub mod api;
 }
 
+pub mod database;
 pub mod pipeline;
 pub mod analytics;
 pub mod resilience;
 
 // Re-export commonly used types at the crate root
+pub use database::Database;
+pub use pipeline::ingestion::{EventIngester, IngestionConfig, IngestionStats};
+pub use analytics::anomaly::{AnomalyDetector, Anomaly, AnomalyType, AnomalySeverity};
+pub use analytics::correlation_engine::{CorrelationEngine, Correlation, CorrelationType};
+pub use analytics::aggregation_engine::AggregationEngine;
 pub use schemas::events::{
     AnalyticsEvent, CommonEventFields, EventPayload, EventType, Severity, SourceModule,
 };
