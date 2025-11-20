@@ -113,6 +113,14 @@ path = "src/examples/metrics_examples.rs"
 name = "llm_analytics_hub"
 path = "src/lib.rs"
 
+[[bin]]
+name = "bench-timescaledb"
+path = "src/bin/bench-timescaledb.rs"
+
+[[bin]]
+name = "bench-redis"
+path = "src/bin/bench-redis.rs"
+
 [[bench]]
 name = "event_processing"
 harness = false
