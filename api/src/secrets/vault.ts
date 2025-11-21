@@ -3,7 +3,7 @@
  * Manages secrets, dynamic credentials, and encryption keys
  */
 
-import * as vault from 'node-vault';
+import vault from 'node-vault';
 
 export interface VaultConfig {
   endpoint: string;

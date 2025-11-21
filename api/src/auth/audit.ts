@@ -141,7 +141,7 @@ export class AuditLogger {
   /**
    * Query audit logs (for compliance reports)
    */
-  async queryLogs(filters: {
+  async queryLogs(_filters: {
     userId?: string;
     organizationId?: string;
     action?: AuditAction;
@@ -160,9 +160,9 @@ export class AuditLogger {
    * Generate compliance report
    */
   async generateComplianceReport(
-    startDate: Date,
-    endDate: Date,
-    reportType: 'soc2' | 'gdpr' | 'hipaa'
+    _startDate: Date,
+    _endDate: Date,
+    _reportType: 'soc2' | 'gdpr' | 'hipaa'
   ): Promise<{
     totalEvents: number;
     criticalEvents: number;
@@ -204,29 +204,29 @@ export class AuditLogger {
   /**
    * Persist audit log to database
    */
-  private async persistAuditLog(log: AuditLog): Promise<void> {
+  private async persistAuditLog(_log: AuditLog): Promise<void> {
     // In production:
     // await db.query(`
     //   INSERT INTO audit_logs (id, timestamp, action, severity, user_id, ...)
     //   VALUES ($1, $2, $3, $4, $5, ...)
     // `, [...values]);
 
-    console.log('Audit log:', JSON.stringify(log));
+    // console.log('Audit log:', JSON.stringify(log));
   }
 
   /**
    * Send to SIEM system
    */
-  private async sendToSIEM(log: AuditLog): Promise<void> {
+  private async sendToSIEM(_log: AuditLog): Promise<void> {
     // In production: Send to Splunk, ELK, or other SIEM
   }
 
   /**
    * Alert security team for critical events
    */
-  private async alertSecurityTeam(log: AuditLog): Promise<void> {
+  private async alertSecurityTeam(_log: AuditLog): Promise<void> {
     // In production: Send to PagerDuty, Slack, email
-    console.warn('CRITICAL AUDIT EVENT:', log);
+    // console.warn('CRITICAL AUDIT EVENT:', log);
   }
 }
 
@@ -239,7 +239,7 @@ export function auditLog(action: AuditAction, options?: {
   resourceType?: string;
   severity?: AuditSeverity;
 }) {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  return (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {

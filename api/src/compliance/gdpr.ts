@@ -221,7 +221,7 @@ export class GDPRComplianceManager {
   /**
    * Check if user has given consent
    */
-  async hasConsent(userId: string, consentType: string): Promise<boolean> {
+  async hasConsent(_userId: string, _consentType: string): Promise<boolean> {
     // In production: Query database
     // SELECT * FROM user_consents WHERE user_id = ? AND consent_type = ?
     return false;
@@ -254,74 +254,74 @@ export class GDPRComplianceManager {
   }
 
   private async queueExportJob(
-    requestId: string,
-    request: GDPRDataExportRequest
+    _requestId: string,
+    _request: GDPRDataExportRequest
   ): Promise<void> {
     // In production: Queue job in Redis/RabbitMQ
   }
 
   private async queueDeletionJob(
-    requestId: string,
-    request: GDPRDataDeletionRequest,
-    scheduledDate: Date
+    _requestId: string,
+    _request: GDPRDataDeletionRequest,
+    _scheduledDate: Date
   ): Promise<void> {
     // In production: Queue scheduled job
   }
 
   private async getExportRequest(
-    requestId: string
+    _requestId: string
   ): Promise<GDPRDataExportRequest | null> {
     // In production: Query database
     return null;
   }
 
   private async getDeletionRequest(
-    requestId: string
+    _requestId: string
   ): Promise<GDPRDataDeletionRequest | null> {
     // In production: Query database
     return null;
   }
 
   private async collectUserData(
-    userId: string,
-    options: { includeEvents: boolean; includeMetrics: boolean; includeAuditLogs: boolean }
+    _userId: string,
+    _options: { includeEvents: boolean; includeMetrics: boolean; includeAuditLogs: boolean }
   ): Promise<any> {
     // In production: Collect all user data from various tables
     return {};
   }
 
-  private async formatExportData(data: any, format: string): Promise<Buffer> {
+  private async formatExportData(_data: any, _format: string): Promise<Buffer> {
     // In production: Format as JSON/CSV/XML
-    return Buffer.from(JSON.stringify(data));
+    return Buffer.from(JSON.stringify(_data));
   }
 
-  private async storeExportFile(requestId: string, data: Buffer): Promise<string> {
+  private async storeExportFile(requestId: string, _data: Buffer): Promise<string> {
     // In production: Store in S3 with encryption and signed URL
     return `https://exports.llm-analytics.com/${requestId}`;
   }
 
-  private async checkLegalHold(userId: string): Promise<boolean> {
+  private async checkLegalHold(_userId: string): Promise<boolean> {
     // In production: Check if user data is under legal hold
     return false;
   }
 
-  private async deleteUserEvents(userId: string): Promise<number> {
+  private async deleteUserEvents(_userId: string): Promise<number> {
     // In production: DELETE FROM events WHERE user_id = ?
     return 0;
   }
 
-  private async deleteUserMetrics(userId: string): Promise<number> {
+  private async deleteUserMetrics(_userId: string): Promise<number> {
     // In production: DELETE FROM metrics WHERE user_id = ?
     return 0;
   }
 
-  private async anonymizeAuditLogs(userId: string): Promise<number> {
+  private async anonymizeAuditLogs(_userId: string): Promise<number> {
     // In production: UPDATE audit_logs SET user_email = 'anonymized@...', ...
     // Cannot delete audit logs (compliance requirement), but can anonymize
     return 0;
   }
 
-  private async deleteUserAccount(userId: string): Promise<boolean> {
+  private async deleteUserAccount(_userId: string): Promise<boolean> {
     // In production: DELETE FROM users WHERE user_id = ?
     return true;
   }

@@ -2,7 +2,7 @@
  * Database connection and query utilities (TimescaleDB/PostgreSQL)
  */
 
-import { Pool, PoolClient, QueryResult } from 'pg';
+import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 import { config } from './config';
 import { logger } from './logger';
 
@@ -32,7 +32,7 @@ export async function setupDatabase(): Promise<Database> {
 export class Database {
   constructor(private pool: Pool) {}
 
-  async query<T = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
+  async query<T extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
     const start = Date.now();
     try {
       const result = await this.pool.query<T>(text, params);

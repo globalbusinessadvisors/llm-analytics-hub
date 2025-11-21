@@ -158,8 +158,8 @@ export async function validateCSRF(
 }
 
 async function validateCSRFToken(
-  csrfToken: string,
-  sessionToken: string
+  _csrfToken: string,
+  _sessionToken: string
 ): Promise<boolean> {
   // In production, this would:
   // 1. Look up session in Redis/database

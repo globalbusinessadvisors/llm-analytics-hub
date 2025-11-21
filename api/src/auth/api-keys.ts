@@ -159,7 +159,7 @@ export class APIKeyManager {
   /**
    * List user's API keys
    */
-  async listUserKeys(userId: string): Promise<Partial<APIKey>[]> {
+  async listUserKeys(_userId: string): Promise<Partial<APIKey>[]> {
     // In production, query database
     // Return sanitized key data (no hashed keys)
     return [];
@@ -187,20 +187,20 @@ export class APIKeyManager {
     console.log('Saving API key:', keyData.keyId);
   }
 
-  private async findKeyByHash(hashedKey: string): Promise<APIKey | null> {
+  private async findKeyByHash(_hashedKey: string): Promise<APIKey | null> {
     // In production: SELECT * FROM api_keys WHERE hashed_key = ?
     return null;
   }
 
-  private async updateLastUsed(keyId: string): Promise<void> {
+  private async updateLastUsed(_keyId: string): Promise<void> {
     // In production: UPDATE api_keys SET last_used_at = NOW() WHERE key_id = ?
   }
 
-  private async updateKeyRevocation(keyId: string, revokedAt: Date): Promise<void> {
+  private async updateKeyRevocation(_keyId: string, _revokedAt: Date): Promise<void> {
     // In production: UPDATE api_keys SET revoked_at = ? WHERE key_id = ?
   }
 
-  private async getKeyById(keyId: string): Promise<APIKey | null> {
+  private async getKeyById(_keyId: string): Promise<APIKey | null> {
     // In production: SELECT * FROM api_keys WHERE key_id = ?
     return null;
   }

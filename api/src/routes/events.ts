@@ -104,7 +104,7 @@ export async function eventsRoutes(fastify: FastifyInstance) {
         events.forEach((event) => EventSchema.parse(event));
 
         // Store in database (transaction)
-        await fastify.db.transaction(async (client) => {
+        await fastify.db.transaction(async (_client) => {
           for (const event of events) {
             await fastify.db.insertEvent(event);
           }

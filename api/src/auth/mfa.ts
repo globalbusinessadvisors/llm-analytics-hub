@@ -16,7 +16,7 @@ export class MFAManager {
   /**
    * Generate MFA secret and QR code
    */
-  async setupMFA(userId: string, email: string): Promise<MFASetup> {
+  async setupMFA(_userId: string, email: string): Promise<MFASetup> {
     // Generate secret
     const secret = speakeasy.generateSecret({
       name: `LLM Analytics Hub (${email})`,
@@ -79,7 +79,7 @@ export class MFAManager {
    * Verify backup code
    */
   async verifyBackupCode(
-    userId: string,
+    _userId: string,
     code: string,
     usedCodes: string[]
   ): Promise<boolean> {

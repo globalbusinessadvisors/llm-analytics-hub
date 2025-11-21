@@ -48,7 +48,18 @@ export class CacheManager {
 
   async delPattern(pattern: string): Promise<number> {
     try {
-      const keys = await this.client.keys(pattern);
+      // Use SCAN instead of KEYS for production
+      const keys: string[] = [];
+
+      // Use scanIterator - works for both single client and cluster
+      const iterator = 'scanIterator' in this.client
+        ? (this.client as any).scanIterator({ MATCH: pattern, COUNT: 100 })
+        : [];
+
+      for await (const key of iterator) {
+        keys.push(key);
+      }
+
       if (keys.length > 0) {
         await this.client.del(keys);
       }
@@ -70,8 +81,14 @@ export class CacheManager {
 
   async ping(): Promise<boolean> {
     try {
-      const result = await this.client.ping();
-      return result === 'PONG';
+      if ('ping' in this.client) {
+        const result = await (this.client as RedisClientType).ping();
+        return result === 'PONG';
+      } else {
+        // For cluster, try a simple command
+        await this.client.get('__ping__');
+        return true;
+      }
     } catch {
       return false;
     }
@@ -100,7 +117,9 @@ export async function setupRedis(): Promise<CacheManager> {
 
   if (config.redis.cluster) {
     client = createCluster({
-      rootNodes: config.redis.nodes,
+      rootNodes: config.redis.nodes.map(node => ({
+        url: `redis://${node.host}:${node.port}`,
+      })),
       defaults: {
         password: config.redis.password,
       },

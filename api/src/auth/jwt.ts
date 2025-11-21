@@ -53,10 +53,10 @@ export class JWTManager {
       },
       this.accessTokenSecret,
       {
-        expiresIn: this.accessTokenExpiry,
+        expiresIn: this.accessTokenExpiry as string,
         issuer: 'llm-analytics-hub',
         audience: 'llm-analytics-api',
-      }
+      } as jwt.SignOptions
     );
 
     const refreshToken = jwt.sign(
@@ -67,10 +67,10 @@ export class JWTManager {
       },
       this.refreshTokenSecret,
       {
-        expiresIn: this.refreshTokenExpiry,
+        expiresIn: this.refreshTokenExpiry as string,
         issuer: 'llm-analytics-hub',
         audience: 'llm-analytics-api',
-      }
+      } as jwt.SignOptions
     );
 
     return {

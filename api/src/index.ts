@@ -21,7 +21,7 @@ import { logger } from './logger';
 
 async function buildServer() {
   const fastify = Fastify({
-    logger: logger,
+    logger: true,
     requestIdLogLabel: 'requestId',
     disableRequestLogging: false,
     trustProxy: true,

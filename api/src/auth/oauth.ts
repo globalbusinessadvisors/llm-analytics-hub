@@ -270,14 +270,14 @@ export class OAuthManager {
   /**
    * Store code verifier (would use Redis in production)
    */
-  private async storeCodeVerifier(state: string, verifier: string): Promise<void> {
+  private async storeCodeVerifier(_state: string, _verifier: string): Promise<void> {
     // In production: await redis.setex(`oauth:verifier:${state}`, 600, verifier);
   }
 
   /**
    * Get code verifier (would use Redis in production)
    */
-  private async getCodeVerifier(state: string): Promise<string | null> {
+  private async getCodeVerifier(_state: string): Promise<string | null> {
     // In production: return await redis.get(`oauth:verifier:${state}`);
     return null;
   }
@@ -285,7 +285,7 @@ export class OAuthManager {
   /**
    * Delete code verifier (would use Redis in production)
    */
-  private async deleteCodeVerifier(state: string): Promise<void> {
+  private async deleteCodeVerifier(_state: string): Promise<void> {
     // In production: await redis.del(`oauth:verifier:${state}`);
   }
 }
