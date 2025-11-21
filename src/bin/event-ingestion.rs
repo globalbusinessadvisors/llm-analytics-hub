@@ -133,7 +133,6 @@ async fn main() -> anyhow::Result<()> {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "event_ingestion=info,tower_http=debug".into()),
         )
-        .json()
         .init();
 
     info!("Starting Event Ingestion Service v{}", env!("CARGO_PKG_VERSION"));

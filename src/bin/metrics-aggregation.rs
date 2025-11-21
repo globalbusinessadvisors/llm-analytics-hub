@@ -193,15 +193,15 @@ impl WindowAggregation {
         let std_dev = variance.sqrt();
 
         StatisticalMeasures {
-            mean,
-            median,
-            std_dev,
+            avg: mean,
             min: self.min,
             max: self.max,
             p50: median,
             p95,
             p99,
-            p999: p99, // Approximation for p999
+            stddev: Some(std_dev),
+            count: self.count,
+            sum: self.sum,
         }
     }
 }
@@ -238,7 +238,8 @@ impl MetricsAggregator {
             let timer = metrics.db_write_duration.with_label_values(&["metrics"]).start_timer();
 
             // Insert aggregated metrics into TimescaleDB
-            let result = sqlx::query!(
+            // Using sqlx::query instead of sqlx::query! to avoid DATABASE_URL requirement at compile time
+            let result = sqlx::query(
                 r#"
                 INSERT INTO aggregated_metrics (
                     window_start, window_end, metric_name, metric_type,
@@ -257,21 +258,21 @@ impl MetricsAggregator {
                     p95 = EXCLUDED.p95,
                     p99 = EXCLUDED.p99
                 "#,
-                window.window_start,
-                window.window_end,
-                key.clone(),
-                "counter",
-                window.count as i64,
-                window.sum,
-                stats.mean,
-                stats.median,
-                stats.std_dev,
-                stats.min,
-                stats.max,
-                stats.p50,
-                stats.p95,
-                stats.p99
             )
+            .bind(&window.window_start)
+            .bind(&window.window_end)
+            .bind(&key)
+            .bind("counter")
+            .bind(window.count as i64)
+            .bind(window.sum)
+            .bind(stats.avg)
+            .bind(stats.p50)
+            .bind(stats.stddev)
+            .bind(stats.min)
+            .bind(stats.max)
+            .bind(stats.p50)
+            .bind(stats.p95)
+            .bind(stats.p99)
             .execute(pool)
             .await;
 
@@ -301,7 +302,6 @@ async fn main() -> anyhow::Result<()> {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "metrics_aggregation=info".into()),
         )
-        .json()
         .init();
 
     info!("Starting Metrics Aggregation Service v{}", env!("CARGO_PKG_VERSION"));

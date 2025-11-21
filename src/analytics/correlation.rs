@@ -4,8 +4,8 @@
 
 use crate::models::correlation::{
     CorrelationId, CorrelationType, EventGraph, EdgeRelationship, EventNode, EventEdge,
+    TimeWindow,
 };
-use crate::models::metrics::TimeWindow;
 use crate::schemas::events::AnalyticsEvent;
 use anyhow::Result;
 use chrono::{DateTime, Duration, Utc};
@@ -57,11 +57,22 @@ impl CorrelationEngine {
         }
 
         // Stub implementation - returns empty graph
+        let now = Utc::now();
         Some(EventGraph {
             graph_id: correlation_id.to_string(),
-            time_range: TimeWindow::Minute1,
+            time_range: TimeWindow {
+                start: now - Duration::minutes(5),
+                end: now,
+            },
             nodes: vec![],
             edges: vec![],
+            metadata: crate::models::correlation::GraphMetadata {
+                node_count: 0,
+                edge_count: 0,
+                connected_components: 0,
+                avg_degree: 0.0,
+                density: 0.0,
+            },
         })
     }
 

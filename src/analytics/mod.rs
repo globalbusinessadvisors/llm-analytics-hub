@@ -65,7 +65,7 @@ impl AnalyticsEngine {
         let config = Arc::new(config);
 
         let aggregation = AggregationEngine::new(config.clone()).await?;
-        let correlation = CorrelationEngine::new(config.clone()).await?;
+        let correlation = CorrelationEngine::new();
         let anomaly = AnomalyDetector::new(config.clone()).await?;
         let prediction = PredictionEngine::new(config.clone()).await?;
 

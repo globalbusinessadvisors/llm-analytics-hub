@@ -244,7 +244,6 @@ async fn main() -> anyhow::Result<()> {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "correlation_engine=info".into()),
         )
-        .json()
         .init();
 
     info!("Starting Correlation Engine Service v{}", env!("CARGO_PKG_VERSION"));

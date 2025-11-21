@@ -14,7 +14,7 @@ use rdkafka::consumer::{CommitMode, Consumer, StreamConsumer};
 use rdkafka::producer::{FutureProducer, FutureRecord};
 use rdkafka::{ClientConfig, Message};
 use serde::{Deserialize, Serialize};
-use statrs::statistics::{Data, OrderStatistics, Statistics};
+use statrs::statistics::{Data, Distribution, Statistics};
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration as StdDuration;
@@ -233,7 +233,6 @@ async fn main() -> anyhow::Result<()> {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "anomaly_detection=info".into()),
         )
-        .json()
         .init();
 
     info!("Starting Anomaly Detection Service v{}", env!("CARGO_PKG_VERSION"));

@@ -307,7 +307,6 @@ async fn main() -> anyhow::Result<()> {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "forecasting=info".into()),
         )
-        .json()
         .init();
 
     info!("Starting Forecasting Service v{}", env!("CARGO_PKG_VERSION"));

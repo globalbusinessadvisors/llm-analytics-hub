@@ -173,6 +173,9 @@ impl S3BackupStorage {
                 .await
                 .context("Failed to list S3 objects")?;
 
+            let is_truncated = response.is_truncated() == Some(true);
+            let next_token = response.next_continuation_token.clone();
+
             if let Some(contents) = response.contents {
                 for object in contents {
                     if let (Some(key), Some(size), Some(last_modified)) =
@@ -205,10 +208,10 @@ impl S3BackupStorage {
                                 })
                                 .unwrap_or(BackupType::Full);
 
-                            let timestamp: DateTime<Utc> = last_modified.as_secs_f64()
-                                .try_into()
-                                .map(|secs| DateTime::from_timestamp(secs, 0).unwrap_or_else(Utc::now))
-                                .unwrap_or_else(|_| Utc::now());
+                            let timestamp: DateTime<Utc> = {
+                                let secs = last_modified.as_secs_f64() as i64;
+                                DateTime::from_timestamp(secs, 0).unwrap_or_else(Utc::now)
+                            };
                             let age_days = (Utc::now() - timestamp).num_days();
 
                             backups.push(BackupEntry {
@@ -224,8 +227,8 @@ impl S3BackupStorage {
                 }
             }
 
-            if response.is_truncated() == Some(true) {
-                continuation_token = response.next_continuation_token;
+            if is_truncated {
+                continuation_token = next_token;
             } else {
                 break;
             }

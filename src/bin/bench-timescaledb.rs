@@ -8,7 +8,7 @@ use chrono::Utc;
 use clap::Parser;
 use colored::Colorize;
 use indicatif::{ProgressBar, ProgressStyle};
-use rand::Rng;
+// use rand::Rng; // Commented out: rand crate not in dependencies
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use std::time::{Duration, Instant};
 use tokio::task::JoinSet;
@@ -148,7 +148,10 @@ async fn create_pool(cli: &Cli) -> Result<PgPool> {
 }
 
 fn generate_metric_record() -> MetricRecord {
-    let mut rng = rand::thread_rng();
+    // Simple pseudo-random generation using timestamp nanos
+    // This is sufficient for benchmark testing without requiring the rand crate
+    let now = Utc::now();
+    let seed = now.timestamp_nanos_opt().unwrap_or(0) as usize;
 
     let models = ["gpt-4", "gpt-3.5-turbo", "claude-3", "claude-2"];
     let providers = ["openai", "anthropic"];
@@ -157,20 +160,20 @@ fn generate_metric_record() -> MetricRecord {
     let envs = ["dev", "staging", "prod"];
 
     MetricRecord {
-        time: Utc::now(),
-        model_id: models[rng.gen_range(0..models.len())].to_string(),
-        provider: providers[rng.gen_range(0..providers.len())].to_string(),
-        request_count: rng.gen_range(1..100),
-        token_input: rng.gen_range(100..10000),
-        token_output: rng.gen_range(100..10000),
-        token_total: rng.gen_range(200..20000),
-        cost_usd: rng.gen_range(0.001..0.5),
-        avg_latency_ms: rng.gen_range(50.0..500.0),
-        error_count: rng.gen_range(0..10),
-        success_count: rng.gen_range(90..100),
-        user_id: users[rng.gen_range(0..users.len())].to_string(),
-        application_id: apps[rng.gen_range(0..apps.len())].to_string(),
-        environment: envs[rng.gen_range(0..envs.len())].to_string(),
+        time: now,
+        model_id: models[seed % models.len()].to_string(),
+        provider: providers[(seed / 2) % providers.len()].to_string(),
+        request_count: ((seed % 99) + 1) as i32,
+        token_input: ((seed % 9900) + 100) as i32,
+        token_output: ((seed / 2 % 9900) + 100) as i32,
+        token_total: ((seed % 19800) + 200) as i32,
+        cost_usd: ((seed % 499) as f64 / 1000.0) + 0.001,
+        avg_latency_ms: ((seed % 450) as f64) + 50.0,
+        error_count: (seed % 10) as i32,
+        success_count: ((seed % 10) + 90) as i32,
+        user_id: users[(seed / 3) % users.len()].to_string(),
+        application_id: apps[(seed / 4) % apps.len()].to_string(),
+        environment: envs[(seed / 5) % envs.len()].to_string(),
     }
 }
 
@@ -330,7 +333,7 @@ async fn test_concurrent_connections(pool: &PgPool, cli: &Cli) -> Result<Duratio
     for _ in 0..cli.connections {
         let pool_clone = pool.clone();
         tasks.spawn(async move {
-            let conn = pool_clone.acquire().await?;
+            let mut conn = pool_clone.acquire().await?;
             sqlx::query("SELECT 1").fetch_one(&mut *conn).await?;
             Ok::<_, anyhow::Error>(())
         });

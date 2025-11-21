@@ -12,6 +12,21 @@ readme = "README.md"
 keywords = ["llm", "analytics", "kafka", "timescaledb", "kubernetes"]
 categories = ["database", "development-tools", "web-programming"]
 rust-version = "1.70"
+exclude = [
+    "target/*",
+    ".git/*",
+    ".github/*",
+    ".vscode/*",
+    ".devcontainer/*",
+    ".claude-flow/*",
+    "*.log",
+    "*.lock",
+    ".DS_Store",
+    "tmp/*",
+    "docs/diagrams/*",
+    "scripts/*",
+    ".env*",
+]
 
 [dependencies]
 # Core dependencies
