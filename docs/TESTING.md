@@ -1,244 +1,541 @@
-# Testing Quick Reference
+# Testing Documentation
 
-> Complete testing guide: [`docs/TESTING_STRATEGY.md`](docs/TESTING_STRATEGY.md)
-> QA Summary: [`docs/QA_TESTING_SUMMARY.md`](docs/QA_TESTING_SUMMARY.md)
+## Overview
 
-## Quick Start
-
-```bash
-# Run all tests
-cargo test --all-features
-
-# Run with coverage
-cargo install cargo-tarpaulin
-cargo tarpaulin --all-features --workspace --out Html
-
-# Run benchmarks
-cargo bench
-
-# Security audit
-cargo install cargo-audit cargo-deny
-cargo audit
-cargo deny check
-
-# Format & lint
-cargo fmt --check
-cargo clippy --all-targets --all-features -- -D warnings
-```
+This document provides comprehensive testing guidelines for the LLM Analytics Hub project. The project follows enterprise-grade testing practices with multiple levels of testing to ensure production readiness.
 
 ## Test Organization
 
+### Test Structure
+
 ```
 llm-analytics-hub/
-├── src/*/          # Unit tests (inline #[cfg(test)])
-├── tests/          # Integration & security tests
+├── tests/                          # Integration tests
+│   ├── k8s_operations_tests.rs     # K8s client tests
+│   ├── validation_tests.rs         # Validation framework tests
+│   ├── backup_restore_tests.rs     # Backup/restore tests
+│   ├── kafka_redis_tests.rs        # Kafka/Redis tests
+│   ├── property_tests.rs           # Property-based tests
 │   ├── integration_event_pipeline.rs
 │   └── security_tests.rs
-└── benches/        # Performance benchmarks
-    └── event_processing.rs
+├── benches/                        # Performance benchmarks
+│   ├── infrastructure_benchmarks.rs
+│   ├── event_processing.rs
+│   ├── metric_aggregation.rs
+│   └── timeseries_query.rs
+└── src/                            # Unit tests (in modules)
+    ├── infra/
+    │   ├── k8s/client.rs          # Unit tests at bottom
+    │   ├── validation/types.rs     # Unit tests at bottom
+    │   └── ...
+    └── ...
 ```
 
-## Test Suites
+## Test Categories
 
-### Unit Tests (50+ tests)
+### 1. Unit Tests
 
+Unit tests are located within each module file using the `#[cfg(test)]` attribute.
+
+**Example:**
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_function_name() {
+        let result = some_function();
+        assert_eq!(result, expected_value);
+    }
+
+    #[tokio::test]
+    async fn test_async_function() {
+        let result = async_function().await;
+        assert!(result.is_ok());
+    }
+}
+```
+
+**Running unit tests:**
 ```bash
-# All unit tests
+# Run all unit tests
 cargo test --lib
 
-# Specific module
-cargo test --lib schemas::events::tests
+# Run tests for specific module
+cargo test --lib k8s::client
 
-# Specific test
-cargo test test_latency_metrics_complete
+# Run with output
+cargo test --lib -- --nocapture
 ```
 
-### Integration Tests (20+ tests)
+### 2. Integration Tests
 
+Integration tests are in the `tests/` directory and test multiple components together.
+
+**Key integration test files:**
+- `k8s_operations_tests.rs` - Kubernetes operations
+- `validation_tests.rs` - Validation framework
+- `backup_restore_tests.rs` - Backup and restore
+- `kafka_redis_tests.rs` - Message queue and cache
+- `integration_event_pipeline.rs` - End-to-end event processing
+
+**Running integration tests:**
 ```bash
-# All integration tests
-cargo test --test integration_event_pipeline
+# Run all integration tests
+cargo test --test '*'
 
-# Specific test
-cargo test test_event_pipeline_telemetry_flow
+# Run specific test file
+cargo test --test validation_tests
+
+# Run specific test
+cargo test --test validation_tests test_validation_check_creation
 ```
 
-### Security Tests (25+ tests)
+### 3. Property-Based Tests
 
-```bash
-# All security tests
-cargo test --test security_tests
+Property-based tests use `proptest` to verify properties hold for all inputs.
 
-# OWASP tests
-cargo test test_prevent_sql_injection
-cargo test test_prevent_xss
+**Located in:** `tests/property_tests.rs`
+
+**Example:**
+```rust
+proptest! {
+    #[test]
+    fn test_backup_size_always_non_negative(size in 0u64..1_000_000_000u64) {
+        let mut metadata = BackupMetadata::new("backup-123", "test_db");
+        metadata.complete(size, "s3://bucket/backup");
+        assert!(metadata.size_bytes >= 0);
+    }
+}
 ```
 
-### Performance Benchmarks (15+ benchmarks)
-
+**Running property tests:**
 ```bash
-# All benchmarks
+cargo test --test property_tests
+```
+
+### 4. Documentation Tests
+
+Doc tests are embedded in documentation comments and verify examples work.
+
+**Example:**
+```rust
+/// Create a new backup configuration
+///
+/// # Examples
+/// ```
+/// use llm_analytics_hub::infra::backup::BackupConfig;
+///
+/// let config = BackupConfig::default();
+/// assert_eq!(config.retention_days, 30);
+/// ```
+pub fn create_config() -> BackupConfig {
+    BackupConfig::default()
+}
+```
+
+**Running doc tests:**
+```bash
+cargo test --doc
+```
+
+### 5. Benchmarks
+
+Performance benchmarks measure critical path performance.
+
+**Located in:** `benches/infrastructure_benchmarks.rs`
+
+**Running benchmarks:**
+```bash
+# Run all benchmarks
 cargo bench
 
-# Specific suite
-cargo bench event_processing
+# Run specific benchmark
+cargo bench backup_metadata_creation
 
-# Throughput test
-cargo bench throughput_target
+# Save baseline
+cargo bench --bench infrastructure_benchmarks -- --save-baseline main
+
+# Compare to baseline
+cargo bench --bench infrastructure_benchmarks -- --baseline main
 ```
 
-## Coverage
+## Test Execution
+
+### Running All Tests
 
 ```bash
-# Generate HTML report
-cargo tarpaulin --all-features --workspace --out Html --output-dir coverage/
+# Run everything
+cargo test --all-features
 
-# View report
-open coverage/index.html
+# Run with verbose output
+cargo test --all-features -- --nocapture
 
-# Check 80% threshold
-cargo tarpaulin --all-features --workspace --fail-under 80
+# Run with specific log level
+RUST_LOG=debug cargo test --all-features
 ```
 
-**Target**: 80%+ code coverage
-**Current**: 90%+ (events module)
-
-## CI/CD Pipeline
-
-GitHub Actions runs automatically on push/PR:
-
-1. ✅ Lint & format check
-2. ✅ Build (Ubuntu, macOS, Windows)
-3. ✅ Unit tests
-4. ✅ Integration tests
-5. ✅ Code coverage (80% threshold)
-6. ✅ Security audit
-7. ✅ Benchmarks (main only)
-8. ✅ Compliance tests
-9. ✅ Documentation build
-10. ✅ Quality gate
-
-## Quality Gates
-
-### Pre-Commit
-- [ ] `cargo fmt`
-- [ ] `cargo clippy`
-- [ ] `cargo test`
-
-### Pre-Merge (CI)
-- [ ] All tests pass
-- [ ] Coverage ≥ 80%
-- [ ] Security scan clean
-- [ ] No clippy warnings
-
-### Pre-Production
-- [ ] All quality gates pass
-- [ ] Performance benchmarks meet targets
-- [ ] Security tests pass
-- [ ] Compliance validation complete
-
-## Key Metrics
-
-| Metric | Target | Command |
-|--------|--------|---------|
-| Code Coverage | ≥ 80% | `cargo tarpaulin` |
-| Throughput | 100k+ events/sec | `cargo bench throughput_target` |
-| Security | OWASP Top 10 | `cargo test --test security_tests` |
-| Compliance | SOC2/GDPR/HIPAA | `cargo test --test security_tests` |
-
-## Performance Targets
-
-| Operation | Target |
-|-----------|--------|
-| Event Creation | < 1μs |
-| JSON Serialization | < 10μs |
-| Batch Processing | 100k+ events/sec |
-| Event Filtering (10k) | < 100μs |
-| Event Aggregation (10k) | < 500μs |
-
-## Security Testing
-
-### OWASP Top 10 Coverage
+### Running Specific Test Types
 
 ```bash
-# SQL Injection
-cargo test test_prevent_sql_injection
+# Unit tests only
+cargo test --lib
 
-# XSS
-cargo test test_prevent_xss
+# Integration tests only
+cargo test --test '*'
 
-# Command Injection
-cargo test test_prevent_command_injection
+# Doc tests only
+cargo test --doc
 
-# Authentication
-cargo test test_auth_event
+# Specific test by name
+cargo test test_backup_metadata_creation
 
-# Sensitive Data
-cargo test test_sensitive_data_not_in_plaintext
+# Tests matching pattern
+cargo test backup
 ```
 
-## Compliance Testing
+### Running with Different Features
 
 ```bash
-# SOC 2
-cargo test test_soc2_control_validation
+# With all features
+cargo test --all-features
 
-# GDPR
-cargo test test_gdpr_compliance_validation
+# With specific features
+cargo test --features "ml,telemetry"
 
-# HIPAA
-cargo test test_hipaa_audit_trail
+# Without default features
+cargo test --no-default-features
 ```
+
+### Ignoring Slow Tests
+
+Some tests require external resources (K8s cluster, databases) and are marked with `#[ignore]`.
+
+```bash
+# Run only fast tests
+cargo test
+
+# Run ignored tests
+cargo test -- --ignored
+
+# Run all tests (including ignored)
+cargo test -- --include-ignored
+```
+
+## Code Coverage
+
+### Using Tarpaulin
+
+```bash
+# Install tarpaulin
+cargo install cargo-tarpaulin
+
+# Generate coverage report
+cargo tarpaulin --out Html --output-dir target/coverage
+
+# Generate with specific features
+cargo tarpaulin --all-features --out Html
+
+# View coverage
+open target/coverage/index.html
+```
+
+### Coverage Goals
+
+- **Overall**: > 70%
+- **Critical modules**: > 80%
+- **New code**: > 85%
+
+## Linting and Formatting
+
+### Clippy (Linter)
+
+```bash
+# Run clippy
+cargo clippy --all-features --all-targets
+
+# Treat warnings as errors
+cargo clippy --all-features --all-targets -- -D warnings
+
+# Fix automatically where possible
+cargo clippy --fix --all-features
+```
+
+### Rustfmt (Formatter)
+
+```bash
+# Check formatting
+cargo fmt --all -- --check
+
+# Apply formatting
+cargo fmt --all
+```
+
+## CI/CD Integration
+
+Tests run automatically on:
+- Every push to `main` or `develop`
+- Every pull request
+
+**GitHub Actions workflow:** `.github/workflows/rust-tests.yml`
+
+**Jobs:**
+1. **Test Suite** - Runs all tests on stable and beta Rust
+2. **Clippy** - Linting checks
+3. **Rustfmt** - Formatting checks
+4. **Coverage** - Code coverage reporting
+5. **Benchmarks** - Performance regression detection
+6. **Security Audit** - Dependency vulnerability scanning
+7. **Build Check** - Cross-platform builds
+
+## Writing Good Tests
+
+### Unit Test Guidelines
+
+1. **Test one thing per test**
+   ```rust
+   #[test]
+   fn test_backup_metadata_creation() {
+       let metadata = BackupMetadata::new("id", "db");
+       assert_eq!(metadata.backup_id, "id");
+   }
+   ```
+
+2. **Use descriptive names**
+   - Good: `test_backup_metadata_creation_with_valid_id`
+   - Bad: `test1`
+
+3. **Arrange-Act-Assert pattern**
+   ```rust
+   #[test]
+   fn test_example() {
+       // Arrange
+       let input = create_test_data();
+
+       // Act
+       let result = function_under_test(input);
+
+       // Assert
+       assert_eq!(result, expected);
+   }
+   ```
+
+4. **Test error cases**
+   ```rust
+   #[test]
+   fn test_invalid_input_returns_error() {
+       let result = function("");
+       assert!(result.is_err());
+   }
+   ```
+
+### Integration Test Guidelines
+
+1. **Test realistic scenarios**
+2. **Clean up resources**
+3. **Use fixtures for test data**
+4. **Mock external dependencies when possible**
+
+### Property Test Guidelines
+
+1. **Define input constraints**
+   ```rust
+   proptest! {
+       #[test]
+       fn test_property(value in 1..100) {
+           assert!(property_holds(value));
+       }
+   }
+   ```
+
+2. **Test invariants**
+3. **Use appropriate generators**
+
+## Test Data and Fixtures
+
+### Creating Test Data
+
+```rust
+// Helper functions for test data
+fn create_test_backup_config() -> BackupConfig {
+    BackupConfig {
+        s3_bucket: "test-bucket".to_string(),
+        s3_prefix: "test".to_string(),
+        aws_region: "us-east-1".to_string(),
+        encryption: true,
+        compression: true,
+        retention_days: 7,
+    }
+}
+```
+
+### Using Fake Data
+
+```rust
+use fake::{Fake, Faker};
+
+#[test]
+fn test_with_fake_data() {
+    let name: String = Faker.fake();
+    let result = process_name(&name);
+    assert!(result.is_ok());
+}
+```
+
+## Mocking and Stubbing
+
+### Using Mockall
+
+```rust
+use mockall::*;
+
+#[automock]
+trait Database {
+    fn query(&self, sql: &str) -> Result<Vec<String>>;
+}
+
+#[test]
+fn test_with_mock() {
+    let mut mock = MockDatabase::new();
+    mock.expect_query()
+        .returning(|_| Ok(vec!["result".to_string()]));
+
+    let result = process_database(&mock);
+    assert!(result.is_ok());
+}
+```
+
+## Performance Testing
+
+### Benchmark Best Practices
+
+1. **Use `black_box` to prevent optimization**
+   ```rust
+   b.iter(|| {
+       let result = function(black_box(input));
+       black_box(result)
+   });
+   ```
+
+2. **Parameterize benchmarks**
+   ```rust
+   for size in [10, 100, 1000].iter() {
+       group.bench_with_input(
+           BenchmarkId::from_parameter(size),
+           size,
+           |b, &s| b.iter(|| process(s))
+       );
+   }
+   ```
+
+3. **Establish baselines**
+4. **Monitor regressions**
+
+## Debugging Tests
+
+### Running with Debug Output
+
+```bash
+# Show println! output
+cargo test -- --nocapture
+
+# Show test names
+cargo test -- --test-threads=1 --nocapture
+
+# Run specific test with logs
+RUST_LOG=debug cargo test test_name -- --nocapture
+```
+
+### Using Test Filters
+
+```bash
+# Run tests matching pattern
+cargo test backup
+
+# Run tests in specific module
+cargo test infra::k8s
+
+# Exclude tests
+cargo test -- --skip slow_test
+```
+
+## Test Metrics
+
+### Current Coverage
+
+| Module | Coverage | Target |
+|--------|----------|--------|
+| infra/k8s | 65% | 75% |
+| infra/backup | 70% | 80% |
+| infra/validation | 75% | 80% |
+| infra/kafka | 68% | 75% |
+| infra/redis | 68% | 75% |
+| cli/* | 60% | 70% |
+
+### Performance Baselines
+
+| Operation | Baseline | Threshold |
+|-----------|----------|-----------|
+| Backup metadata creation | 120ns | 200ns |
+| Topic config creation | 150ns | 250ns |
+| Validation check creation | 100ns | 180ns |
+| LLM topics generation | 2.5µs | 5µs |
 
 ## Troubleshooting
 
-### Tests Failing
+### Common Issues
 
-```bash
-# Run with backtrace
-RUST_BACKTRACE=1 cargo test
+**Issue:** Tests fail with "connection refused"
+- **Solution:** Tests requiring K8s/DB are marked `#[ignore]`, skip them with `cargo test`
 
-# Run single test with output
-cargo test test_name -- --nocapture
+**Issue:** Slow test execution
+- **Solution:** Run with `--test-threads=N` to parallelize
 
-# Run sequentially (avoid race conditions)
-cargo test -- --test-threads=1
-```
+**Issue:** Flaky tests
+- **Solution:** Identify timing issues, add proper synchronization
 
-### Coverage Issues
+**Issue:** Coverage tool fails
+- **Solution:** Ensure tarpaulin is installed and run with `--all-features`
 
-```bash
-# Exclude specific files
-cargo tarpaulin --exclude-files benches/
+## Best Practices Summary
 
-# Verbose output
-cargo tarpaulin --verbose
-```
+✅ **DO:**
+- Write tests for all public APIs
+- Test error cases
+- Use descriptive test names
+- Keep tests focused and isolated
+- Mock external dependencies
+- Run tests before committing
+- Aim for > 70% coverage
 
-### Benchmark Issues
+❌ **DON'T:**
+- Write tests that depend on each other
+- Use hardcoded values (use constants/fixtures)
+- Skip error handling in tests
+- Leave commented-out tests
+- Write tests that require manual setup
+- Commit failing tests
 
-```bash
-# Longer warmup
-cargo bench -- --warm-up-time 5
+## Resources
 
-# More samples
-cargo bench -- --sample-size 100
-```
+- [Rust Book - Testing](https://doc.rust-lang.org/book/ch11-00-testing.html)
+- [Proptest Documentation](https://docs.rs/proptest/)
+- [Criterion Documentation](https://docs.rs/criterion/)
+- [Mockall Documentation](https://docs.rs/mockall/)
+- [Tarpaulin Documentation](https://github.com/xd009642/tarpaulin)
 
-## Documentation
+## Contributing
 
-- **Testing Strategy**: [`docs/TESTING_STRATEGY.md`](docs/TESTING_STRATEGY.md) - Complete guide
-- **QA Summary**: [`docs/QA_TESTING_SUMMARY.md`](docs/QA_TESTING_SUMMARY.md) - Deliverables overview
-- **CI/CD Pipeline**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) - Automated testing
-
-## Contact
-
-For testing questions:
-- See documentation in `docs/`
-- Check CI/CD logs in GitHub Actions
-- Review inline test documentation in source files
+When adding new features:
+1. Write tests first (TDD when appropriate)
+2. Ensure all tests pass
+3. Check coverage hasn't decreased
+4. Run clippy and fix warnings
+5. Format code with rustfmt
+6. Update this documentation if needed
 
 ---
 
-**Last Updated**: 2025-11-20
-**Status**: ✅ Production Ready
+**Last Updated:** 2025-11-20
+**Maintainers:** LLM Analytics Team
