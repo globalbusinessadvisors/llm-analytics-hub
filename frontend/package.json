@@ -1,8 +1,14 @@
 {
-  "name": "llm-analytics-hub-frontend",
+  "name": "@llm-dev-ops/llm-analytics-dashboard",
   "version": "1.0.0",
-  "description": "Enterprise-grade Analytics Dashboard for LLM DevOps Platform",
-  "private": true,
+  "description": "Enterprise-grade Analytics Dashboard for LLM DevOps Platform with real-time monitoring and visualization",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -11,7 +17,36 @@
     "type-check": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "llm",
+    "analytics",
+    "dashboard",
+    "monitoring",
+    "visualization",
+    "react",
+    "typescript",
+    "devops",
+    "observability",
+    "real-time",
+    "metrics",
+    "charts"
+  ],
+  "author": "LLM Analytics Team",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/globalbusinessadvisors/llm-analytics-hub.git",
+    "directory": "frontend"
+  },
+  "bugs": {
+    "url": "https://github.com/globalbusinessadvisors/llm-analytics-hub/issues"
+  },
+  "homepage": "https://github.com/globalbusinessadvisors/llm-analytics-hub#readme",
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "react": "^18.2.0",

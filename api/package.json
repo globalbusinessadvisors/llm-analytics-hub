@@ -1,7 +1,7 @@
 {
-  "name": "@llm-analytics-hub/api",
+  "name": "@llm-dev-ops/llm-analytics-api",
   "version": "0.1.0",
-  "description": "TypeScript API server for LLM Analytics Hub with enterprise security",
+  "description": "TypeScript API server for LLM Analytics Hub with enterprise security, authentication, and monitoring",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -10,7 +10,8 @@
     "start": "node dist/index.js",
     "test": "jest",
     "lint": "eslint src --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "llm",
@@ -19,10 +20,29 @@
     "api",
     "security",
     "oauth",
-    "rbac"
+    "rbac",
+    "fastify",
+    "kafka",
+    "redis",
+    "postgresql",
+    "timescaledb",
+    "devops",
+    "observability"
   ],
   "author": "LLM Analytics Team",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/globalbusinessadvisors/llm-analytics-hub.git",
+    "directory": "api"
+  },
+  "bugs": {
+    "url": "https://github.com/globalbusinessadvisors/llm-analytics-hub/issues"
+  },
+  "homepage": "https://github.com/globalbusinessadvisors/llm-analytics-hub#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "fastify": "^4.25.0",
     "fastify-plugin": "^4.5.1",
