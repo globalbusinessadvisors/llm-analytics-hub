@@ -96,14 +96,16 @@ k8s-openapi = { version = "0.20", features = ["v1_28"] }
 # YAML support
 serde_yaml = "0.9"
 
-# Cloud provider SDKs (optional features)
-aws-config = { version = "1.0", optional = true }
+# Cloud provider SDKs - S3 and config required for backup module
+aws-config = "1.0"
+aws-sdk-s3 = "1.0"
+
+# Optional cloud SDKs for deployment features
 aws-sdk-eks = { version = "1.0", optional = true }
 aws-sdk-rds = { version = "1.0", optional = true }
 aws-sdk-elasticache = { version = "1.0", optional = true }
 aws-sdk-kafka = { version = "1.0", optional = true }
 aws-sdk-ec2 = { version = "1.0", optional = true }
-aws-sdk-s3 = { version = "1.0", optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["full"] }
@@ -128,7 +130,7 @@ full = ["ml", "telemetry"]
 ml = ["linfa", "linfa-clustering"]
 telemetry = ["opentelemetry", "opentelemetry-prometheus"]
 timeseries = ["influxdb"]
-aws = ["aws-config", "aws-sdk-eks", "aws-sdk-rds", "aws-sdk-elasticache", "aws-sdk-kafka", "aws-sdk-ec2", "aws-sdk-s3"]
+aws = ["aws-sdk-eks", "aws-sdk-rds", "aws-sdk-elasticache", "aws-sdk-kafka", "aws-sdk-ec2"]
 cloud = ["aws"]
 
 [[example]]

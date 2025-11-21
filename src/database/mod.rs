@@ -110,7 +110,7 @@ impl Database {
         let event_json = serde_json::to_value(event)
             .context("Failed to serialize event")?;
 
-        let event_id = query!(
+        let row = sqlx::query(
             r#"
             INSERT INTO events (
                 event_id, timestamp, source_module, event_type,
@@ -119,24 +119,24 @@ impl Database {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             RETURNING event_id
-            "#,
-            event.common.event_id,
-            event.common.timestamp,
-            serde_json::to_value(&event.common.source_module)?,
-            serde_json::to_value(&event.common.event_type)?,
-            event.common.correlation_id,
-            event.common.parent_event_id,
-            event.common.schema_version,
-            serde_json::to_value(&event.common.severity)?,
-            event.common.environment,
-            serde_json::to_value(&event.common.tags)?,
-            event_json
+            "#
         )
+        .bind(event.common.event_id)
+        .bind(event.common.timestamp)
+        .bind(serde_json::to_value(&event.common.source_module)?)
+        .bind(serde_json::to_value(&event.common.event_type)?)
+        .bind(event.common.correlation_id)
+        .bind(event.common.parent_event_id)
+        .bind(&event.common.schema_version)
+        .bind(serde_json::to_value(&event.common.severity)?)
+        .bind(&event.common.environment)
+        .bind(serde_json::to_value(&event.common.tags)?)
+        .bind(event_json)
         .fetch_one(&self.pool)
         .await
         .context("Failed to insert event")?;
 
-        Ok(event_id.event_id)
+        Ok(row.try_get("event_id")?)
     }
 
     /// Batch insert analytics events for high throughput
@@ -197,25 +197,28 @@ impl Database {
     ) -> Result<Vec<AnalyticsEvent>> {
         let limit = limit.unwrap_or(1000);
 
-        let rows = query!(
+        let rows = sqlx::query(
             r#"
             SELECT payload
             FROM events
             WHERE timestamp >= $1 AND timestamp < $2
             ORDER BY timestamp DESC
             LIMIT $3
-            "#,
-            start,
-            end,
-            limit
+            "#
         )
+        .bind(start)
+        .bind(end)
+        .bind(limit)
         .fetch_all(&self.pool)
         .await
         .context("Failed to query events")?;
 
         let events: Vec<AnalyticsEvent> = rows
             .into_iter()
-            .filter_map(|row| serde_json::from_value(row.payload).ok())
+            .filter_map(|row| {
+                let payload: serde_json::Value = row.try_get("payload").ok()?;
+                serde_json::from_value(payload).ok()
+            })
             .collect();
 
         Ok(events)
@@ -227,22 +230,25 @@ impl Database {
         &self,
         correlation_id: Uuid,
     ) -> Result<Vec<AnalyticsEvent>> {
-        let rows = query!(
+        let rows = sqlx::query(
             r#"
             SELECT payload
             FROM events
             WHERE correlation_id = $1
             ORDER BY timestamp ASC
-            "#,
-            correlation_id
+            "#
         )
+        .bind(correlation_id)
         .fetch_all(&self.pool)
         .await
         .context("Failed to query events by correlation")?;
 
         let events: Vec<AnalyticsEvent> = rows
             .into_iter()
-            .filter_map(|row| serde_json::from_value(row.payload).ok())
+            .filter_map(|row| {
+                let payload: serde_json::Value = row.try_get("payload").ok()?;
+                serde_json::from_value(payload).ok()
+            })
             .collect();
 
         Ok(events)
@@ -260,7 +266,7 @@ impl Database {
         tags: &serde_json::Value,
         measures: &StatisticalMeasures,
     ) -> Result<()> {
-        query!(
+        sqlx::query(
             r#"
             INSERT INTO aggregated_metrics (
                 metric_name, time_window, window_start, tags,
@@ -278,21 +284,21 @@ impl Database {
                 stddev = EXCLUDED.stddev,
                 count = EXCLUDED.count,
                 sum = EXCLUDED.sum
-            "#,
-            metric_name,
-            time_window.as_str(),
-            window_start,
-            tags,
-            measures.avg,
-            measures.min,
-            measures.max,
-            measures.p50,
-            measures.p95,
-            measures.p99,
-            measures.stddev,
-            measures.count as i64,
-            measures.sum
+            "#
         )
+        .bind(metric_name)
+        .bind(time_window.as_str())
+        .bind(window_start)
+        .bind(tags)
+        .bind(measures.avg)
+        .bind(measures.min)
+        .bind(measures.max)
+        .bind(measures.p50)
+        .bind(measures.p95)
+        .bind(measures.p99)
+        .bind(measures.stddev)
+        .bind(measures.count as i64)
+        .bind(measures.sum)
         .execute(&self.pool)
         .await
         .context("Failed to store aggregated metric")?;
@@ -309,8 +315,7 @@ impl Database {
         start: DateTime<Utc>,
         end: DateTime<Utc>,
     ) -> Result<Vec<AggregatedMetricRow>> {
-        let rows = query_as!(
-            AggregatedMetricRow,
+        let rows = sqlx::query_as::<_, AggregatedMetricRow>(
             r#"
             SELECT
                 metric_name, time_window, window_start, tags,
@@ -321,12 +326,12 @@ impl Database {
               AND window_start >= $3
               AND window_start < $4
             ORDER BY window_start ASC
-            "#,
-            metric_name,
-            time_window.as_str(),
-            start,
-            end
+            "#
         )
+        .bind(metric_name)
+        .bind(time_window.as_str())
+        .bind(start)
+        .bind(end)
         .fetch_all(&self.pool)
         .await
         .context("Failed to query aggregated metrics")?;
@@ -350,7 +355,7 @@ impl Database {
         confidence_score: f64,
         context: &serde_json::Value,
     ) -> Result<Uuid> {
-        let result = query!(
+        let result = sqlx::query(
             r#"
             INSERT INTO anomalies (
                 anomaly_id, detected_at, metric_name, anomaly_type,
@@ -358,22 +363,22 @@ impl Database {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING anomaly_id
-            "#,
-            anomaly_id,
-            detected_at,
-            metric_name,
-            anomaly_type,
-            severity,
-            value,
-            expected_value,
-            confidence_score,
-            context
+            "#
         )
+        .bind(anomaly_id)
+        .bind(detected_at)
+        .bind(metric_name)
+        .bind(anomaly_type)
+        .bind(severity)
+        .bind(value)
+        .bind(expected_value)
+        .bind(confidence_score)
+        .bind(context)
         .fetch_one(&self.pool)
         .await
         .context("Failed to store anomaly")?;
 
-        Ok(result.anomaly_id)
+        Ok(result.try_get("anomaly_id")?)
     }
 
     /// Query recent anomalies
@@ -385,8 +390,7 @@ impl Database {
     ) -> Result<Vec<AnomalyRow>> {
         let limit = limit.unwrap_or(100);
 
-        let rows = query_as!(
-            AnomalyRow,
+        let rows = sqlx::query_as::<_, AnomalyRow>(
             r#"
             SELECT
                 anomaly_id, detected_at, metric_name, anomaly_type,
@@ -395,10 +399,10 @@ impl Database {
             WHERE detected_at >= $1
             ORDER BY detected_at DESC
             LIMIT $2
-            "#,
-            since,
-            limit
+            "#
         )
+        .bind(since)
+        .bind(limit)
         .fetch_all(&self.pool)
         .await
         .context("Failed to query anomalies")?;
@@ -419,7 +423,7 @@ impl Database {
         strength: f64,
         metadata: &serde_json::Value,
     ) -> Result<Uuid> {
-        let result = query!(
+        let result = sqlx::query(
             r#"
             INSERT INTO correlations (
                 correlation_id, correlation_type, source_event_id,
@@ -427,26 +431,26 @@ impl Database {
             )
             VALUES ($1, $2, $3, $4, $5, $6, NOW())
             RETURNING correlation_id
-            "#,
-            correlation_id,
-            correlation_type,
-            source_event_id,
-            target_event_id,
-            strength,
-            metadata
+            "#
         )
+        .bind(correlation_id)
+        .bind(correlation_type)
+        .bind(source_event_id)
+        .bind(target_event_id)
+        .bind(strength)
+        .bind(metadata)
         .fetch_one(&self.pool)
         .await
         .context("Failed to store correlation")?;
 
-        Ok(result.correlation_id)
+        Ok(result.try_get("correlation_id")?)
     }
 
     // ========== Health Check ==========
 
     /// Check database health
     pub async fn health_check(&self) -> Result<DatabaseHealth> {
-        let result = query!(
+        let result = sqlx::query(
             r#"
             SELECT
                 (SELECT COUNT(*) FROM pg_stat_activity WHERE state = 'active') as active_connections,
@@ -458,9 +462,9 @@ impl Database {
         .await?;
 
         Ok(DatabaseHealth {
-            active_connections: result.active_connections.unwrap_or(0),
-            recent_events: result.recent_events.unwrap_or(0),
-            database_size_bytes: result.database_size.unwrap_or(0),
+            active_connections: result.try_get::<Option<i64>, _>("active_connections")?.unwrap_or(0),
+            recent_events: result.try_get::<Option<i64>, _>("recent_events")?.unwrap_or(0),
+            database_size_bytes: result.try_get::<Option<i64>, _>("database_size")?.unwrap_or(0),
         })
     }
 }

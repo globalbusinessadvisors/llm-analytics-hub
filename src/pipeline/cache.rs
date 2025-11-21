@@ -21,14 +21,9 @@ pub struct CacheManager {
 impl CacheManager {
     /// Create a new cache manager
     pub async fn new(config: &PipelineConfig) -> Result<Self> {
-        // For cluster mode, use cluster client
-        let client = if config.redis_nodes.len() > 1 {
-            Client::open(config.redis_nodes.clone())
-                .context("Failed to create Redis cluster client")?
-        } else {
-            Client::open(config.redis_nodes[0].as_str())
-                .context("Failed to create Redis client")?
-        };
+        // Use the first node for connection (cluster topology discovered automatically)
+        let client = Client::open(config.redis_nodes[0].as_str())
+            .context("Failed to create Redis client")?;
 
         Ok(Self {
             client,
@@ -52,7 +47,7 @@ impl CacheManager {
     /// Cache a metric value
     pub async fn cache_metric(&mut self, key: &str, value: f64, ttl: Option<Duration>) -> Result<()> {
         let conn = self.get_connection().await?;
-        let ttl_secs = ttl.unwrap_or(self.default_ttl).as_secs() as usize;
+        let ttl_secs = ttl.unwrap_or(self.default_ttl).as_secs();
 
         conn.set_ex(key, value, ttl_secs).await?;
         debug!("Cached metric: {} = {}", key, value);
@@ -78,7 +73,7 @@ impl CacheManager {
         let json = serde_json::to_string(data)?;
         let conn = self.get_connection().await?;
 
-        conn.set_ex(key, json, self.default_ttl.as_secs() as usize)
+        conn.set_ex(key, json, self.default_ttl.as_secs())
             .await?;
 
         Ok(())
@@ -136,7 +131,7 @@ impl CacheManager {
     /// Set a value with TTL
     pub async fn set_with_ttl(&mut self, key: &str, value: &str, ttl: Duration) -> Result<()> {
         let conn = self.get_connection().await?;
-        conn.set_ex(key, value, ttl.as_secs() as usize).await?;
+        conn.set_ex(key, value, ttl.as_secs()).await?;
         Ok(())
     }
 

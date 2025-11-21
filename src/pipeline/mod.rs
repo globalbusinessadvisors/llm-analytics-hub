@@ -16,8 +16,10 @@ pub use cache::CacheManager;
 pub use stream::StreamManager;
 
 use crate::schemas::events::AnalyticsEvent;
+use crate::database::Database;
 use anyhow::Result;
 use async_trait::async_trait;
+use std::sync::Arc;
 
 /// Pipeline configuration
 #[derive(Debug, Clone)]
@@ -61,6 +63,7 @@ impl Default for PipelineConfig {
 /// Main pipeline orchestrator
 pub struct Pipeline {
     config: PipelineConfig,
+    database: Arc<Database>,
     ingester: EventIngester,
     processor: EventProcessor,
     storage: StorageManager,
@@ -71,7 +74,22 @@ pub struct Pipeline {
 impl Pipeline {
     /// Create a new pipeline instance
     pub async fn new(config: PipelineConfig) -> Result<Self> {
-        let ingester = EventIngester::new(&config).await?;
+        // Create database connection
+        let database = Arc::new(Database::new(&config.timescaledb_url).await?);
+
+        // Create ingestion config from pipeline config
+        let ingestion_config = ingestion::IngestionConfig {
+            kafka_brokers: config.kafka_brokers.clone(),
+            topics: vec!["llm-analytics-events".to_string()],
+            group_id: "llm-analytics-hub".to_string(),
+            buffer_size: config.buffer_size,
+            batch_size: config.batch_size,
+            max_retries: 3,
+            enable_dlq: true,
+            dlq_topic: "llm-analytics-events-dlq".to_string(),
+        };
+
+        let ingester = EventIngester::new(ingestion_config, database.clone()).await?;
         let processor = EventProcessor::new(&config).await?;
         let storage = StorageManager::new(&config).await?;
         let cache = CacheManager::new(&config).await?;
@@ -79,6 +97,7 @@ impl Pipeline {
 
         Ok(Self {
             config,
+            database,
             ingester,
             processor,
             storage,

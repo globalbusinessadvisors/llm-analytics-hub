@@ -47,7 +47,7 @@ impl Default for IngestionConfig {
 /// Event ingester with high-performance Kafka integration
 pub struct EventIngester {
     config: IngestionConfig,
-    consumer: StreamConsumer,
+    consumer: Arc<StreamConsumer>,
     producer: FutureProducer,
     database: Arc<Database>,
     metrics: Arc<IngestionMetrics>,
@@ -99,7 +99,7 @@ impl EventIngester {
 
         Ok(Self {
             config,
-            consumer,
+            consumer: Arc::new(consumer),
             producer,
             database,
             metrics,

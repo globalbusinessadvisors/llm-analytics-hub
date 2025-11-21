@@ -71,8 +71,7 @@ pub mod infra;
 pub use database::Database;
 pub use pipeline::ingestion::{EventIngester, IngestionConfig, IngestionStats};
 pub use analytics::anomaly::{AnomalyDetector, Anomaly, AnomalyType, AnomalySeverity};
-pub use analytics::correlation_engine::{CorrelationEngine, Correlation, CorrelationType};
-pub use analytics::aggregation_engine::AggregationEngine;
+pub use analytics::{CorrelationEngine, AggregationEngine};
 pub use schemas::events::{
     AnalyticsEvent, CommonEventFields, EventPayload, EventType, Severity, SourceModule,
 };

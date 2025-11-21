@@ -9,6 +9,11 @@ pub mod aws;
 pub mod gcp;
 pub mod azure;
 
+// Re-export cloud providers for convenience
+pub use aws::AwsProvider;
+pub use gcp::GcpProvider;
+pub use azure::AzureProvider;
+
 use anyhow::Result;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
