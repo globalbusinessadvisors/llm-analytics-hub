@@ -166,9 +166,5 @@ name = "event_processing"
 harness = false
 
 [[bench]]
-name = "metric_aggregation"
-harness = false
-
-[[bench]]
-name = "timeseries_query"
+name = "infrastructure_benchmarks"
 harness = false
