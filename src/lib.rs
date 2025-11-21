@@ -62,6 +62,11 @@ pub mod pipeline;
 pub mod analytics;
 pub mod resilience;
 
+// CLI and infrastructure modules
+pub mod cli;
+pub mod common;
+pub mod infra;
+
 // Re-export commonly used types at the crate root
 pub use database::Database;
 pub use pipeline::ingestion::{EventIngester, IngestionConfig, IngestionStats};

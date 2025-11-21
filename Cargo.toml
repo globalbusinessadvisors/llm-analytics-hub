@@ -70,12 +70,35 @@ parking_lot = "0.12"
 futures = "0.3"
 bytes = "1.5"
 regex = "1.10"
+dirs = "5.0"
 
 # CLI tools
-clap = { version = "4.4", features = ["derive"] }
+clap = { version = "4.4", features = ["derive", "env", "string"] }
 colored = "2.1"
 reqwest = { version = "0.11", features = ["json"] }
 indicatif = "0.17"
+console = "0.15"
+dialoguer = "0.11"
+comfy-table = "7.1"
+
+# Kubernetes
+kube = { version = "0.87", features = ["runtime", "client", "derive"] }
+k8s-openapi = { version = "0.20", features = ["v1_28"] }
+
+# YAML support
+serde_yaml = "0.9"
+
+# Cloud provider SDKs (optional features)
+aws-config = { version = "1.0", optional = true }
+aws-sdk-eks = { version = "1.0", optional = true }
+aws-sdk-rds = { version = "1.0", optional = true }
+aws-sdk-elasticache = { version = "1.0", optional = true }
+aws-sdk-kafka = { version = "1.0", optional = true }
+aws-sdk-ec2 = { version = "1.0", optional = true }
+aws-sdk-s3 = { version = "1.0", optional = true }
+
+# Process execution for terraform
+tokio-process = "0.3"
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["full"] }
@@ -100,6 +123,8 @@ full = ["ml", "telemetry"]
 ml = ["linfa", "linfa-clustering"]
 telemetry = ["opentelemetry", "opentelemetry-prometheus"]
 timeseries = ["influxdb"]
+aws = ["aws-config", "aws-sdk-eks", "aws-sdk-rds", "aws-sdk-elasticache", "aws-sdk-kafka", "aws-sdk-ec2", "aws-sdk-s3"]
+cloud = ["aws"]
 
 [[example]]
 name = "event_examples"
@@ -124,6 +149,10 @@ path = "src/bin/bench-redis.rs"
 [[bin]]
 name = "kafka-admin"
 path = "src/bin/kafka-admin.rs"
+
+[[bin]]
+name = "llm-analytics"
+path = "src/bin/llm-analytics.rs"
 
 [[bench]]
 name = "event_processing"
