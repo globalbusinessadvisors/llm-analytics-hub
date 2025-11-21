@@ -97,7 +97,7 @@ const TimeSeriesLineChart: React.FC<TimeSeriesLineChartProps> = ({
       .attr('transform', `translate(0,${height})`)
       .call(d3.axisBottom(x));
 
-    const yAxis = g.append('g')
+    g.append('g')
       .attr('class', 'y-axis')
       .call(d3.axisLeft(y));
 
@@ -133,7 +133,7 @@ const TimeSeriesLineChart: React.FC<TimeSeriesLineChartProps> = ({
         .attr('r', 3)
         .attr('fill', colors[0])
         .style('cursor', 'pointer')
-        .on('click', (event, d) => {
+        .on('click', (_event, d) => {
           if (onDataPointClick) {
             onDataPointClick(d);
           }
@@ -236,7 +236,7 @@ const TimeSeriesLineChart: React.FC<TimeSeriesLineChartProps> = ({
     if (!containerRef.current) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect;
+      const { width } = entries[0].contentRect;
       setDimensions({ width, height: propHeight });
     });
 

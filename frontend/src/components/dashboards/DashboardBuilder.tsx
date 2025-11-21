@@ -11,7 +11,6 @@ import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   FileCopy as CopyIcon,
-  Save as SaveIcon,
 } from '@mui/icons-material';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { WidgetConfig, ChartType } from '@/types/dashboard';
@@ -32,7 +31,7 @@ const DashboardBuilder: React.FC<DashboardBuilderProps> = ({
   dashboardId,
   isEditMode: propEditMode = false,
 }) => {
-  const [isEditMode, setIsEditMode] = useState(propEditMode);
+  const [isEditMode] = useState(propEditMode);
   const [showChartSelector, setShowChartSelector] = useState(false);
   const [editingWidget, setEditingWidget] = useState<string | null>(null);
 

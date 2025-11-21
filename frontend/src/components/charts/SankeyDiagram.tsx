@@ -5,7 +5,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { sankey, sankeyLinkHorizontal, SankeyNode, SankeyLink } from 'd3-sankey';
+import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import { ChartComponentProps } from './ChartRegistry';
 
 interface SankeyData {
@@ -31,7 +31,7 @@ const SankeyDiagram: React.FC<SankeyProps> = ({
   onDataPointClick,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [dimensions, setDimensions] = useState({ width: propWidth || 900, height: propHeight });
+  const [dimensions] = useState({ width: propWidth || 900, height: propHeight });
 
   const {
     nodeWidth = 20,
@@ -81,10 +81,10 @@ const SankeyDiagram: React.FC<SankeyProps> = ({
       .attr('stroke-width', (d: any) => Math.max(1, d.width))
       .attr('fill', 'none')
       .attr('opacity', 0.3)
-      .on('mouseover', function() {
+      .on('mouseover', function(_event) {
         d3.select(this).attr('opacity', 0.6);
       })
-      .on('mouseout', function() {
+      .on('mouseout', function(_event) {
         d3.select(this).attr('opacity', 0.3);
       });
 
@@ -111,7 +111,7 @@ const SankeyDiagram: React.FC<SankeyProps> = ({
       .attr('stroke', '#000')
       .attr('stroke-width', 1)
       .style('cursor', 'pointer')
-      .on('click', (event, d) => {
+      .on('click', (_event, d) => {
         if (onDataPointClick) {
           onDataPointClick(d);
         }

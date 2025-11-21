@@ -32,7 +32,7 @@ const Heatmap: React.FC<HeatmapProps> = ({
   onDataPointClick,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [dimensions, setDimensions] = useState({ width: propWidth || 800, height: propHeight });
+  const [dimensions] = useState({ width: propWidth || 800, height: propHeight });
 
   const {
     colorScheme = 'blues',
@@ -104,7 +104,7 @@ const Heatmap: React.FC<HeatmapProps> = ({
       .attr('stroke', 'white')
       .attr('stroke-width', cellPadding)
       .style('cursor', 'pointer')
-      .on('click', (event, d) => {
+      .on('click', (_event, d) => {
         if (onDataPointClick) {
           onDataPointClick(d);
         }
@@ -166,7 +166,7 @@ const Heatmap: React.FC<HeatmapProps> = ({
       .data(legendData)
       .enter()
       .append('rect')
-      .attr('y', (d, i) => legendHeight - (i / legendSteps) * legendHeight)
+      .attr('y', (_d, i) => legendHeight - (i / legendSteps) * legendHeight)
       .attr('width', legendWidth)
       .attr('height', legendHeight / legendSteps + 1)
       .attr('fill', d => d.color);

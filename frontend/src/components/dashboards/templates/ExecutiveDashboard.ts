@@ -325,7 +325,6 @@ export const ExecutiveDashboard: DashboardTemplate = {
     auto_refresh: true,
     refresh_interval: 30,
     is_public: false,
-    created_by: 'system',
     tags: ['executive', 'overview', 'kpi'],
   },
 };
