@@ -117,23 +117,20 @@ impl ResourceManager {
 
     /// Calculate age of a resource
     fn calculate_age(&self, pod: &Pod) -> String {
-        if let metadata = &pod.metadata {
-            if let Some(creation_timestamp) = &metadata.creation_timestamp {
-                let created = creation_timestamp.0;
-                let now = chrono::Utc::now();
-                let duration = now.signed_duration_since(created);
+        let metadata = &pod.metadata;
+        if let Some(creation_timestamp) = &metadata.creation_timestamp {
+            let created = creation_timestamp.0;
+            let now = chrono::Utc::now();
+            let duration = now.signed_duration_since(created);
 
-                if duration.num_days() > 0 {
-                    format!("{}d", duration.num_days())
-                } else if duration.num_hours() > 0 {
-                    format!("{}h", duration.num_hours())
-                } else if duration.num_minutes() > 0 {
-                    format!("{}m", duration.num_minutes())
-                } else {
-                    format!("{}s", duration.num_seconds())
-                }
+            if duration.num_days() > 0 {
+                format!("{}d", duration.num_days())
+            } else if duration.num_hours() > 0 {
+                format!("{}h", duration.num_hours())
+            } else if duration.num_minutes() > 0 {
+                format!("{}m", duration.num_minutes())
             } else {
-                "Unknown".to_string()
+                format!("{}s", duration.num_seconds())
             }
         } else {
             "Unknown".to_string()

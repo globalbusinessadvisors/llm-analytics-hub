@@ -62,7 +62,9 @@ impl Default for PipelineConfig {
 
 /// Main pipeline orchestrator
 pub struct Pipeline {
+    #[allow(dead_code)]
     config: PipelineConfig,
+    #[allow(dead_code)]
     database: Arc<Database>,
     ingester: EventIngester,
     processor: EventProcessor,

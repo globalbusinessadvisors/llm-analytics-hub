@@ -152,38 +152,6 @@ timeseries = ["influxdb"]
 aws = ["aws-sdk-eks", "aws-sdk-rds", "aws-sdk-elasticache", "aws-sdk-kafka", "aws-sdk-ec2"]
 cloud = ["aws"]
 
-[[example]]
-name = "event_examples"
-path = "src/examples/event_examples.rs"
-
-[[example]]
-name = "metrics_examples"
-path = "src/examples/metrics_examples.rs"
-
 [lib]
 name = "llm_analytics_hub"
 path = "src/lib.rs"
-
-[[bin]]
-name = "bench-timescaledb"
-path = "src/bin/bench-timescaledb.rs"
-
-[[bin]]
-name = "bench-redis"
-path = "src/bin/bench-redis.rs"
-
-[[bin]]
-name = "kafka-admin"
-path = "src/bin/kafka-admin.rs"
-
-[[bin]]
-name = "llm-analytics"
-path = "src/bin/llm-analytics.rs"
-
-[[bench]]
-name = "event_processing"
-harness = false
-
-[[bench]]
-name = "infrastructure_benchmarks"
-harness = false

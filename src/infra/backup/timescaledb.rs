@@ -223,7 +223,7 @@ impl TimescaleBackupManager {
     async fn create_full_backup(
         &self,
         pod_name: &str,
-        database: &str,
+        _database: &str,
         backup_dir: &str,
         backup_file: &str,
     ) -> Result<()> {
@@ -424,7 +424,7 @@ impl TimescaleBackupManager {
     }
 
     /// Create restore pod
-    async fn create_restore_pod(&self, namespace: &str, backup_id: &str) -> Result<String> {
+    async fn create_restore_pod(&self, _namespace: &str, backup_id: &str) -> Result<String> {
         let pod_name = format!("restore-{}", backup_id);
 
         // This is a simplified version - in production, you'd use proper pod specs
@@ -444,7 +444,7 @@ impl TimescaleBackupManager {
     async fn restore_from_backup(
         &self,
         pod_name: &str,
-        database: &str,
+        _database: &str,
         backup_file: &str,
     ) -> Result<()> {
         info!("Restoring database from backup");
@@ -470,8 +470,8 @@ impl TimescaleBackupManager {
     async fn apply_pitr(
         &self,
         pod_name: &str,
-        database: &str,
-        wal_position: &str,
+        _database: &str,
+        _wal_position: &str,
         target_time: &chrono::DateTime<Utc>,
     ) -> Result<()> {
         info!("Applying PITR to {}", target_time.to_rfc3339());

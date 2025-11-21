@@ -6,7 +6,7 @@ use k8s_openapi::api::core::v1::{Namespace, Pod, Service};
 use kube::{
     api::{Api, DeleteParams, ListParams, Patch, PatchParams, PostParams},
     config::{Config, Kubeconfig, KubeConfigOptions},
-    Client, ResourceExt,
+    Client,
 };
 use serde::Deserialize;
 use std::path::PathBuf;

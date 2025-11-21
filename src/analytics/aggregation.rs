@@ -16,6 +16,7 @@ use super::AnalyticsConfig;
 
 /// Real-time aggregation engine
 pub struct AggregationEngine {
+    #[allow(dead_code)]
     config: Arc<AnalyticsConfig>,
     // Window -> Metric Name -> Aggregation State
     aggregations: Arc<DashMap<TimeWindow, DashMap<String, AggregationState>>>,
@@ -59,10 +60,10 @@ impl AggregationEngine {
         metric_name: &str,
         value: f64,
         timestamp: DateTime<Utc>,
-        tags: HashMap<String, String>,
+        _tags: HashMap<String, String>,
     ) -> Result<()> {
         for window_map in self.aggregations.iter() {
-            let window = *window_map.key();
+            let _window = *window_map.key();
             let metrics = window_map.value();
 
             metrics

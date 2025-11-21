@@ -16,6 +16,7 @@ use uuid::Uuid;
 /// Correlation engine for cross-module event analysis
 pub struct CorrelationEngine {
     correlations: Arc<DashMap<Uuid, Vec<Uuid>>>,
+    #[allow(dead_code)]
     correlation_window: Duration,
 }
 

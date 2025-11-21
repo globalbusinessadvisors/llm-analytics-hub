@@ -5,7 +5,6 @@ use aws_sdk_s3::primitives::ByteStream;
 use aws_sdk_s3::types::{Delete, ObjectIdentifier};
 use aws_sdk_s3::Client as S3Client;
 use chrono::{DateTime, Utc};
-use futures::StreamExt;
 use std::path::Path;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;

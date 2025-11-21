@@ -12,6 +12,7 @@ use super::{HealthStatus, PipelineComponent, PipelineConfig};
 /// Stream manager for real-time event distribution
 pub struct StreamManager {
     event_tx: broadcast::Sender<AnalyticsEvent>,
+    #[allow(dead_code)]
     buffer_size: usize,
 }
 

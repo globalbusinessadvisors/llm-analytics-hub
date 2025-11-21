@@ -217,17 +217,16 @@ impl DeploymentManager {
         // Add restart annotation
         let restart_time = chrono::Utc::now().to_rfc3339();
         if let Some(spec) = &mut deployment.spec {
-            if let template = &mut spec.template {
-                if let Some(metadata) = &mut template.metadata {
-                    if metadata.annotations.is_none() {
-                        metadata.annotations = Some(std::collections::BTreeMap::new());
-                    }
-                    if let Some(annotations) = &mut metadata.annotations {
-                        annotations.insert(
-                            "kubectl.kubernetes.io/restartedAt".to_string(),
-                            restart_time,
-                        );
-                    }
+            let template = &mut spec.template;
+            if let Some(metadata) = &mut template.metadata {
+                if metadata.annotations.is_none() {
+                    metadata.annotations = Some(std::collections::BTreeMap::new());
+                }
+                if let Some(annotations) = &mut metadata.annotations {
+                    annotations.insert(
+                        "kubectl.kubernetes.io/restartedAt".to_string(),
+                        restart_time,
+                    );
                 }
             }
         }

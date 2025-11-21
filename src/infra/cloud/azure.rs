@@ -262,7 +262,7 @@ impl CloudProviderOps for AzureProvider {
         Ok(())
     }
 
-    async fn status(&self, config: &CloudDeploymentConfig) -> Result<CloudDeploymentResult> {
+    async fn status(&self, _config: &CloudDeploymentConfig) -> Result<CloudDeploymentResult> {
         info!("Getting Azure deployment status");
 
         warn!("Status check not fully implemented");

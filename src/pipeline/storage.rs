@@ -269,7 +269,7 @@ impl StorageManager {
         let events = Vec::new();
         for row in rows {
             // Parse the row data - this is simplified, actual implementation would need proper deserialization
-            let payload: serde_json::Value = row.try_get("payload")?;
+            let _payload: serde_json::Value = row.try_get("payload")?;
             // TODO: Properly reconstruct AnalyticsEvent from row data
         }
 

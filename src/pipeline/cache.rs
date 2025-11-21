@@ -169,7 +169,7 @@ impl CacheManager {
     /// Get cache statistics
     pub async fn get_stats(&mut self) -> Result<CacheStats> {
         let conn = self.get_connection().await?;
-        let info: String = redis::cmd("INFO")
+        let _info: String = redis::cmd("INFO")
             .query_async(conn)
             .await?;
 

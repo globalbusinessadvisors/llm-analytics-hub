@@ -12,6 +12,7 @@ use super::{HealthStatus, PipelineComponent, PipelineConfig};
 
 /// Event processor with validation and enrichment
 pub struct EventProcessor {
+    #[allow(dead_code)]
     config: Arc<PipelineConfig>,
     stats: Arc<RwLock<ProcessingStats>>,
 }

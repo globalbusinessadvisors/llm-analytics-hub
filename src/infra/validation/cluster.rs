@@ -104,9 +104,8 @@ impl ClusterValidator {
 
                     if has_pressure {
                         nodes_with_pressure += 1;
-                        if let metadata = &node.metadata {
-                            debug!("Node {} under resource pressure", metadata.name.as_ref().unwrap_or(&"unknown".to_string()));
-                        }
+                        let metadata = &node.metadata;
+                        debug!("Node {} under resource pressure", metadata.name.as_ref().unwrap_or(&"unknown".to_string()));
                     }
                 }
             }

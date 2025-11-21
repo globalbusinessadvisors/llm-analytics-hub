@@ -52,6 +52,7 @@ impl Default for AnalyticsConfig {
 
 /// Main analytics engine orchestrator
 pub struct AnalyticsEngine {
+    #[allow(dead_code)]
     config: Arc<AnalyticsConfig>,
     aggregation: AggregationEngine,
     correlation: CorrelationEngine,

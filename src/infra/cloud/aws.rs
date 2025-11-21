@@ -23,6 +23,7 @@ impl AwsProvider {
     }
 
     /// Get AWS region from config or environment
+    #[allow(dead_code)]
     fn get_region(config: &CloudDeploymentConfig) -> String {
         config.region.clone()
     }
@@ -257,7 +258,7 @@ impl CloudProviderOps for AwsProvider {
         Ok(())
     }
 
-    async fn status(&self, config: &CloudDeploymentConfig) -> Result<CloudDeploymentResult> {
+    async fn status(&self, _config: &CloudDeploymentConfig) -> Result<CloudDeploymentResult> {
         info!("Getting AWS deployment status");
 
         // In production, this would query AWS APIs for actual status
