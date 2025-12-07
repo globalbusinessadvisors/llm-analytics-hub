@@ -50,6 +50,17 @@ llm-registry-core = "0.1.0"
 llm-config-core = "0.5.0"
 llm-config-storage = "0.5.0"
 
+# LLM-Infra - Shared infrastructure utilities (Phase 2B)
+# Provides: config loading, structured logging, distributed tracing,
+# error utilities, caching, retry logic, rate limiting, LLM client abstractions
+llm-infra-core = { git = "https://github.com/LLM-Dev-Ops/llm-infra", branch = "main", optional = true }
+llm-infra-config = { git = "https://github.com/LLM-Dev-Ops/llm-infra", branch = "main", optional = true }
+llm-infra-logging = { git = "https://github.com/LLM-Dev-Ops/llm-infra", branch = "main", optional = true }
+llm-infra-tracing = { git = "https://github.com/LLM-Dev-Ops/llm-infra", branch = "main", optional = true }
+llm-infra-cache = { git = "https://github.com/LLM-Dev-Ops/llm-infra", branch = "main", optional = true }
+llm-infra-retry = { git = "https://github.com/LLM-Dev-Ops/llm-infra", branch = "main", optional = true }
+llm-infra-ratelimit = { git = "https://github.com/LLM-Dev-Ops/llm-infra", branch = "main", optional = true }
+
 # Core dependencies
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -169,6 +180,15 @@ telemetry = ["opentelemetry", "opentelemetry-prometheus"]
 timeseries = ["influxdb"]
 aws = ["aws-sdk-eks", "aws-sdk-rds", "aws-sdk-elasticache", "aws-sdk-kafka", "aws-sdk-ec2"]
 cloud = ["aws"]
+
+# Phase 2B Infra Integration Features
+infra = ["infra-config", "infra-logging", "infra-tracing", "infra-cache", "infra-retry", "infra-ratelimit"]
+infra-config = ["llm-infra-core", "llm-infra-config"]
+infra-logging = ["llm-infra-core", "llm-infra-logging"]
+infra-tracing = ["llm-infra-core", "llm-infra-tracing"]
+infra-cache = ["llm-infra-core", "llm-infra-cache"]
+infra-retry = ["llm-infra-core", "llm-infra-retry"]
+infra-ratelimit = ["llm-infra-core", "llm-infra-ratelimit"]
 
 [lib]
 name = "llm_analytics_hub"

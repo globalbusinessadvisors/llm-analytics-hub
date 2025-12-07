@@ -1,0 +1,334 @@
+{
+  "$schema": "https://llm-dev-ops.github.io/schemas/integration-manifest.v1.json",
+  "name": "llm-analytics-hub",
+  "version": "0.1.0",
+  "description": "Enterprise-grade centralized analytics hub for LLM ecosystem monitoring",
+  "repository": "https://github.com/LLM-Dev-Ops/llm-analytics-hub",
+  "phase": "2B",
+  "lastUpdated": "2025-12-07T00:00:00Z",
+
+  "role": {
+    "type": "analytics-aggregator",
+    "description": "Unified analytics and forecasting layer for the LLM-Dev-Ops platform",
+    "responsibilities": [
+      "Aggregate telemetry from Observatory",
+      "Track performance metrics across all modules",
+      "Detect drift signals and anomalies",
+      "Provide cost analytics from CostOps",
+      "Maintain historical benchmarking data",
+      "Generate forecasts and predictions"
+    ]
+  },
+
+  "phase1": {
+    "exposesTo": [
+      {
+        "module": "llm-observatory",
+        "apis": ["telemetry-ingestion", "metrics-query", "dashboard-data"],
+        "description": "Provides analytics aggregation for telemetry data"
+      },
+      {
+        "module": "llm-sentinel",
+        "apis": ["security-analytics", "threat-correlation"],
+        "description": "Provides security threat analytics and correlation"
+      },
+      {
+        "module": "llm-governance-dashboard",
+        "apis": ["compliance-metrics", "policy-analytics"],
+        "description": "Provides governance and compliance analytics"
+      },
+      {
+        "module": "llm-marketplace",
+        "apis": ["usage-analytics", "performance-benchmarks"],
+        "description": "Provides marketplace usage and performance data"
+      }
+    ]
+  },
+
+  "phase2A": {
+    "consumesFrom": [
+      {
+        "module": "llm-observatory",
+        "crates": ["llm-observatory-core", "llm-observatory-sdk"],
+        "npm": ["@llm-dev-ops/observatory-sdk"],
+        "dataTypes": ["TelemetryDataPoint", "UsageTrace", "PerformanceMetrics"],
+        "adapter": "src/adapters/observatory.rs"
+      },
+      {
+        "module": "llm-costops",
+        "crates": ["cost-ops"],
+        "npm": [],
+        "dataTypes": ["CostSummary", "CostProjection", "TokenAccounting"],
+        "adapter": "src/adapters/costops.rs"
+      },
+      {
+        "module": "llm-memory-graph",
+        "crates": ["llm-memory-graph"],
+        "npm": [],
+        "dataTypes": ["ContextLineage", "InteractionMetadata"],
+        "adapter": "src/adapters/memory_graph.rs"
+      },
+      {
+        "module": "llm-registry",
+        "crates": ["llm-registry-core"],
+        "npm": ["@llm-dev-ops/llm-registry-sdk"],
+        "dataTypes": ["ModelMetadata", "PipelineDescriptor", "PerformanceMetrics"],
+        "adapter": "src/adapters/registry.rs"
+      },
+      {
+        "module": "llm-config-manager",
+        "crates": ["llm-config-core", "llm-config-storage"],
+        "npm": ["@llm-dev-ops/llm-config-core"],
+        "dataTypes": ["AnalyticsParameters", "RetentionSettings", "FeatureFlags"],
+        "adapter": "src/adapters/config_manager.rs"
+      }
+    ]
+  },
+
+  "phase2B": {
+    "infraIntegration": {
+      "status": "configured",
+      "rust": {
+        "crates": [
+          {
+            "name": "llm-infra-core",
+            "version": "main",
+            "source": "git",
+            "optional": true,
+            "provides": ["error-utilities", "common-types"]
+          },
+          {
+            "name": "llm-infra-config",
+            "version": "main",
+            "source": "git",
+            "optional": true,
+            "provides": ["configuration-loading", "environment-parsing", "yaml-config"]
+          },
+          {
+            "name": "llm-infra-logging",
+            "version": "main",
+            "source": "git",
+            "optional": true,
+            "provides": ["structured-logging", "log-formatting"]
+          },
+          {
+            "name": "llm-infra-tracing",
+            "version": "main",
+            "source": "git",
+            "optional": true,
+            "provides": ["distributed-tracing", "span-management", "opentelemetry-integration"]
+          },
+          {
+            "name": "llm-infra-cache",
+            "version": "main",
+            "source": "git",
+            "optional": true,
+            "provides": ["caching-abstraction", "redis-wrapper", "ttl-management"]
+          },
+          {
+            "name": "llm-infra-retry",
+            "version": "main",
+            "source": "git",
+            "optional": true,
+            "provides": ["retry-policies", "exponential-backoff", "circuit-breaker"]
+          },
+          {
+            "name": "llm-infra-ratelimit",
+            "version": "main",
+            "source": "git",
+            "optional": true,
+            "provides": ["rate-limiting", "throttling", "quota-management"]
+          }
+        ],
+        "featureFlags": {
+          "infra": "Enables all Infra modules",
+          "infra-config": "Configuration loading from Infra",
+          "infra-logging": "Structured logging from Infra",
+          "infra-tracing": "Distributed tracing from Infra",
+          "infra-cache": "Caching abstraction from Infra",
+          "infra-retry": "Retry policies from Infra",
+          "infra-ratelimit": "Rate limiting from Infra"
+        }
+      },
+      "typescript": {
+        "packages": [
+          {
+            "name": "@llm-dev-ops/llm-infra-core",
+            "version": "^0.1.0",
+            "provides": ["error-utilities", "common-types"]
+          },
+          {
+            "name": "@llm-dev-ops/llm-infra-config",
+            "version": "^0.1.0",
+            "provides": ["configuration-loading", "environment-parsing"]
+          },
+          {
+            "name": "@llm-dev-ops/llm-infra-logging",
+            "version": "^0.1.0",
+            "provides": ["structured-logging", "pino-wrapper"]
+          },
+          {
+            "name": "@llm-dev-ops/llm-infra-tracing",
+            "version": "^0.1.0",
+            "provides": ["distributed-tracing", "opentelemetry-integration"]
+          },
+          {
+            "name": "@llm-dev-ops/llm-infra-cache",
+            "version": "^0.1.0",
+            "provides": ["caching-abstraction", "redis-wrapper"]
+          },
+          {
+            "name": "@llm-dev-ops/llm-infra-retry",
+            "version": "^0.1.0",
+            "provides": ["retry-policies", "exponential-backoff"]
+          },
+          {
+            "name": "@llm-dev-ops/llm-infra-ratelimit",
+            "version": "^0.1.0",
+            "provides": ["rate-limiting", "throttling"]
+          }
+        ]
+      }
+    },
+    "duplicateCodeToReplace": [
+      {
+        "file": "api/src/cache.ts",
+        "lines": "1-147",
+        "description": "Custom CacheManager wrapper",
+        "replaceWith": "@llm-dev-ops/llm-infra-cache",
+        "priority": "high"
+      },
+      {
+        "file": "api/src/config.ts",
+        "lines": "1-82",
+        "description": "Manual environment variable parsing",
+        "replaceWith": "@llm-dev-ops/llm-infra-config",
+        "priority": "high"
+      },
+      {
+        "file": "src/common/config.rs",
+        "lines": "1-276",
+        "description": "Custom YAML configuration loader",
+        "replaceWith": "llm-infra-config",
+        "priority": "high"
+      },
+      {
+        "file": "api/src/logger.ts",
+        "lines": "1-27",
+        "description": "Pino logger setup",
+        "replaceWith": "@llm-dev-ops/llm-infra-logging",
+        "priority": "medium"
+      },
+      {
+        "file": "src/common/executor.rs",
+        "lines": "44-96",
+        "description": "Command executor retry loop",
+        "replaceWith": "llm-infra-retry",
+        "priority": "medium"
+      },
+      {
+        "file": "src/resilience/retry.rs",
+        "lines": "1-122",
+        "description": "Retry policy implementation",
+        "replaceWith": "llm-infra-retry",
+        "priority": "medium"
+      },
+      {
+        "file": "src/resilience/circuit_breaker.rs",
+        "lines": "1-200",
+        "description": "Circuit breaker implementation",
+        "replaceWith": "llm-infra-retry",
+        "priority": "medium"
+      },
+      {
+        "file": "api/src/auth/middleware.ts",
+        "lines": "175-220",
+        "description": "Custom user-based rate limiter",
+        "replaceWith": "@llm-dev-ops/llm-infra-ratelimit",
+        "priority": "medium"
+      },
+      {
+        "file": "frontend/src/services/websocket.ts",
+        "lines": "42-142",
+        "description": "WebSocket reconnection logic",
+        "replaceWith": "@llm-dev-ops/llm-infra-retry",
+        "priority": "low"
+      },
+      {
+        "file": "api/src/database.ts",
+        "lines": "1-188",
+        "description": "PostgreSQL connection pool wrapper",
+        "replaceWith": "@llm-dev-ops/llm-infra-core (optional)",
+        "priority": "low"
+      }
+    ]
+  },
+
+  "circularDependencyCheck": {
+    "status": "passed",
+    "notes": [
+      "Analytics Hub only CONSUMES from other modules",
+      "Other modules only EXPOSE data to Analytics Hub",
+      "No bidirectional dependencies exist",
+      "Infra modules are foundation-level with no upstream dependencies"
+    ],
+    "dependencyGraph": {
+      "llm-infra": [],
+      "llm-analytics-hub": [
+        "llm-infra",
+        "llm-observatory",
+        "llm-costops",
+        "llm-memory-graph",
+        "llm-registry",
+        "llm-config-manager"
+      ]
+    }
+  },
+
+  "compilationStatus": {
+    "rust": {
+      "command": "cargo build --features default",
+      "status": "compiles-without-infra",
+      "notes": "Infra features are optional - will compile when llm-infra repo is available"
+    },
+    "typescript": {
+      "api": {
+        "command": "cd api && npm run build",
+        "status": "compiles-without-infra",
+        "notes": "Infra packages are optional - will compile when published to npm"
+      },
+      "frontend": {
+        "command": "cd frontend && npm run build",
+        "status": "compiles-without-infra",
+        "notes": "Infra packages are optional - will compile when published to npm"
+      }
+    }
+  },
+
+  "remainingInfraNeeds": {
+    "advancedForecasting": [
+      {
+        "abstraction": "llm-infra-ml",
+        "description": "Machine learning model serving abstraction",
+        "useCase": "LSTM/Prophet model inference for forecasting"
+      },
+      {
+        "abstraction": "llm-infra-streaming",
+        "description": "Stream processing abstraction",
+        "useCase": "Real-time analytics pipeline management"
+      }
+    ],
+    "futurePhases": [
+      {
+        "abstraction": "llm-infra-auth",
+        "description": "Authentication and authorization abstraction",
+        "useCase": "Replace custom JWT, OAuth, RBAC implementations"
+      },
+      {
+        "abstraction": "llm-infra-secrets",
+        "description": "Secrets management abstraction",
+        "useCase": "Replace custom Vault wrapper"
+      }
+    ]
+  }
+}
